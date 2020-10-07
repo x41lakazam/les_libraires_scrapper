@@ -6,26 +6,22 @@ import urllib
 import scrapy
 from scrapy.loader import ItemLoader
 from leslibraires.items import BookItem
-
+from leslibraires.constants import *
 
 class BooksListSpider(scrapy.Spider):
     name = "books_list"
 
-    #allowed_domains = ["www.leslibraires.fr"]
+    start_urls = START_URLS
 
-    start_urls = [
-        "https://www.leslibraires.fr/rayon/litterature?f_price=5%2710%7C10%2720%7C20%2740%7C40%27-&f_shipping_delay=1",
-        "https://www.leslibraires.fr/rayon/arts-et-beaux-livres?f_price=5%2710%7C10%2720%7C20%2740%7C40%27-&f_shipping_delay=1",
-    ]
-
-    custom_settings = {
-        'CLOSESPIDER_PAGECOUNT': 50,
-        'ITEM_PIPELINES': {
+    custom_settings = dict(
+        ITEM_PIPELINES = {
             'leslibraires.pipelines.BookPipeline': 300,
             'leslibraires.pipelines.CsvBookWriterPipeline': 400,
         },
-        'HTTPERROR_ALLOWED_CODES':[404],
-    }
+        RETRY_HTTP_CODES = [503],
+    )
+    if MAX_PAGES > 0:
+        custom_settings['CLOSESPIDER_PAGECOUNT'] = MAX_PAGES
 
     def parse(self, response):
         # class ppanel-product
@@ -62,9 +58,6 @@ class BooksListSpider(scrapy.Spider):
             yield response.follow(next_page, self.parse)
 
     def parse_book_details(self, response):
-        if response.status == 404:
-            self.error_404(response)
-            return
 
         book_item = response.meta['book_item']
 
@@ -96,8 +89,18 @@ class BooksListSpider(scrapy.Spider):
         weight = weight.replace(u'\xa0', ' ') # TODO: Put in pipeline
 
         book_item['title']   = title
+        #book_item['description'] = description
         book_item['author']  = author
+        book_item['book_format'] = book_format
+        book_item['ean13'] = ean13
+        book_item['isbn'] = isbn
         book_item['edition'] = edition
+        book_item['publish_date'] = publish_date
+        book_item['collection'] = collection
+        book_item['page_nb'] = pages_nb
+        book_item['dimensions'] = dimensions
+        book_item['weight'] = weight
+        book_item['lang'] = lang
 
 
         offers_uri = response.xpath("//section[@id='product-offers']/div/a/@href").get()
@@ -119,9 +122,6 @@ class BooksListSpider(scrapy.Spider):
             yield req
 
     def parse_book_offers(self, response):
-        if response.status == 404:
-            self.error_404(response)
-            return
 
         book_item = response.meta['book_item']
 
@@ -129,10 +129,19 @@ class BooksListSpider(scrapy.Spider):
 
         book_item['_librairies'] = librairies
 
+        print("Found item")
+
         yield book_item
 
     def errorback(self, failure):
-        print(failure.url)
+        print("="*50)
+        print("="*50)
+        print("Failure")
+        print(failure)
+        print(failure.value.response)
+        print("="*50)
+        print("="*50)
+        print("\n")
 
     def error_404(self, response):
         print(f"404 error: {response.url}")

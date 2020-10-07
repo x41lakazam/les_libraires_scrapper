@@ -15,10 +15,10 @@ SPIDER_MODULES = ['leslibraires.spiders']
 NEWSPIDER_MODULE = 'leslibraires.spiders'
 
 #### FEED EXPORT
-FEED_URI = 'results.json'
-FEED_FORMAT = 'json'
-FEED_EXPORT_ENCODING = 'utf-8'
-FEED_EXPORT_INDENT = 2
+#FEED_URI = 'results.json'
+#FEED_FORMAT = 'json'
+#FEED_EXPORT_ENCODING = 'utf-8'
+#FEED_EXPORT_INDENT = 2
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'leslibraires (+http://www.yourdomain.com)'

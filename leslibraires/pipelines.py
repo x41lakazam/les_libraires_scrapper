@@ -7,7 +7,7 @@
 
 import csv
 from .items import BookItem
-from .constants import *
+from leslibraires.constants import *
 
 class BookPipeline:
 

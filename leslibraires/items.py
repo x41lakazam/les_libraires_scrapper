@@ -7,10 +7,11 @@
 
 import scrapy
 from scrapy import Field
-from .constants import *
+from leslibraires.constants import *
 
 class BookItem(scrapy.Item):
     title           = Field()
+    #description     = Field()
     author          = Field()
     edition         = Field()
     book_format     = Field()
@@ -30,6 +31,7 @@ class BookItem(scrapy.Item):
     def keys(cls):
         return [
             'title',
+            #'description',
             'author',
             'edition',
             'book_format',
@@ -46,6 +48,7 @@ class BookItem(scrapy.Item):
     def as_dict(self):
         return dict(
             title        = self.get('title', ''),
+            #description  = self.get('description', ''),
             author       = self.get('author', ''),
             edition      = self.get('edition', ''),
             book_format  = self.get('book_format', ''),
@@ -63,7 +66,8 @@ class BookItem(scrapy.Item):
         if len(self['_librairies']) < 3:
             return False
 
-        # Add your filters here
+        if self['edition'].lower() in UNTRUSTED_LIBRARIES:
+            return False
 
         return True
 
