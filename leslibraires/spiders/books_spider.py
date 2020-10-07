@@ -63,6 +63,7 @@ class BooksListSpider(scrapy.Spider):
 
         book_infos = response.xpath("//div[@itemtype='http://schema.org/Book']")[0]
         main_infos = response.xpath("//div[@class='main-infos']")[0]
+        image_url  =  response.xpath("//a[@data-target='#product-images']/div/img/@src").get()
 
         author  = main_infos.xpath(".//h2/a/text()").get()
         title   = main_infos.xpath(".//h1/span/text()").get()
@@ -90,6 +91,7 @@ class BooksListSpider(scrapy.Spider):
 
         book_item['title']   = title
         #book_item['description'] = description
+        book_item['image_url'] = image_url
         book_item['author']  = author
         book_item['book_format'] = book_format
         book_item['ean13'] = ean13

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import scrapy
 
 # Scrapy settings for leslibraires project
 #
@@ -66,6 +67,7 @@ ROBOTSTXT_OBEY = False
 #EXTENSIONS = {
 #    'scrapy.extensions.telnet.TelnetConsole': None,
 #}
+
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
