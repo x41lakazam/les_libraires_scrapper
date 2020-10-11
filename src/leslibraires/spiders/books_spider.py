@@ -65,8 +65,11 @@ class BooksListSpider(scrapy.Spider):
         main_infos = response.xpath("//div[@class='main-infos']")[0]
         image_url  =  response.xpath("//a[@data-target='#product-images']/div/img/@src").get()
 
+        description = response.xpath("//div[@id='infos-description']/text()").get().strip()
+
         author  = main_infos.xpath(".//h2/a/text()").get()
         title   = main_infos.xpath(".//h1/span/text()").get()
+
 
         def get_or_none(xpath, default=""):
             selector = response.xpath(xpath)
@@ -90,7 +93,7 @@ class BooksListSpider(scrapy.Spider):
         weight = weight.replace(u'\xa0', ' ') # TODO: Put in pipeline
 
         book_item['title']   = title
-        #book_item['description'] = description
+        book_item['description'] = description
         book_item['image_url'] = image_url
         book_item['author']  = author
         book_item['book_format'] = book_format

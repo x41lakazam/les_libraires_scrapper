@@ -14,7 +14,7 @@ from leslibraires.constants import *
 
 class BookItem(scrapy.Item):
     title           = Field()
-    #description     = Field()
+    description     = Field()
     image_url       = Field()
     author          = Field()
     edition         = Field()
@@ -35,7 +35,7 @@ class BookItem(scrapy.Item):
     def keys(cls):
         return [
             'title',
-            #'description',
+            'description',
             'image_url',
             'author',
             'edition',
@@ -53,7 +53,7 @@ class BookItem(scrapy.Item):
     def as_dict(self):
         return dict(
             title        = self.get('title', ''),
-            #description  = self.get('description', ''),
+            description  = self.get('description', ''),
             image_url    = self.get('image_url', ''),
             author       = self.get('author', ''),
             edition      = self.get('edition', ''),
@@ -74,6 +74,10 @@ class BookItem(scrapy.Item):
 
         if self['edition'].lower() in UNTRUSTED_LIBRARIES:
             return False
+
+        for field in REQUIRED_FIELDS:
+            if not self[field]:
+                return False
 
         return True
 

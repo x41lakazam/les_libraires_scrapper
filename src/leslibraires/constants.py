@@ -7,12 +7,12 @@ UNTRUSTED_LIBRARIES = [
 REQUIRED_FIELDS = [
     "title",
     "author",
-    #"description",
+    "description",
     "ean13"
 ]
 
 # Nombre de pages maximum a crawler (-1 = illimite)
-MAX_PAGES = 100
+MAX_PAGES = -1
 
 # Urls de base
 BASE_URL = "https://www.leslibraires.fr"
