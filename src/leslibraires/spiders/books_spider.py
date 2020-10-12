@@ -15,10 +15,11 @@ class Stats:
         self.failed_on = defaultdict(int)
         self.pages = 0
         self.total_books = 0
+        self.books_scrapped = 0
 
     def describe(self):
         print("="*50)
-        print(f"Statistics on {self.pages} pages ({self.total_books} books)")
+        print(f"Statistics on {self.pages} pages ({self.books_scrapped}/{self.total_books} books)")
         print("Failed on:")
         for k, v in self.failed_on.items():
             print(f'- {k}\t{v}')
@@ -41,11 +42,16 @@ class BooksListSpider(scrapy.Spider):
         },
         RETRY_HTTP_CODES = [500, 502, 503, 504, 522, 524, 408, 429],
         RETRY_TIMES = 10,
+        CONCURENT_REQUESTS = 1,
+        DOWNLOAD_DELAY = 5,
     )
 
     DOWNLOADER_MIDDLEWARES = {
-           'scrapy.downloadermiddlewares.retry.RetryMiddleware': 90,
+        'scrapy.downloadermiddlewares.retry.RetryMiddleware': 90,
+        'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
+        'scrapy_user_agents.middlewares.RandomUserAgentMiddleware': 400,
     }
+
 
 
     if MAX_PAGES > 0:
@@ -93,6 +99,8 @@ class BooksListSpider(scrapy.Spider):
             yield response.follow(next_page, self.parse)
 
     def parse_book_details(self, response):
+
+        stats.books_scrapped += 1
 
         book_item = response.meta['book_item']
 
