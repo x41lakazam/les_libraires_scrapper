@@ -14,10 +14,11 @@ class Stats:
     def __init__(self):
         self.failed_on = defaultdict(int)
         self.pages = 0
+        self.total_books = 0
 
     def describe(self):
         print("="*50)
-        print(f"Statistics on {self.pages} pages")
+        print(f"Statistics on {self.pages} pages ({self.total_books} books)")
         print("Failed on:")
         for k, v in self.failed_on.items():
             print(f'- {k}\t{v}')
@@ -59,6 +60,7 @@ class BooksListSpider(scrapy.Spider):
         books_nb = len(books_list)
 
         for ix, book in enumerate(books_list):
+            stats.total_books += 1
 
             book_item = BookItem()
             book_item['_librairies'] = []
