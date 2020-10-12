@@ -24,6 +24,7 @@ class CsvBookWriterPipeline:
         print("[*] Creating CSV file")
         self.valid_items_count = 0
 
+        open("running.state", 'w').write('1')
         self.csv_file = open("results.csv", 'w')
         self.csv_writer = csv.DictWriter(self.csv_file, fieldnames=BookItem.keys())
         self.csv_writer.writeheader()
@@ -44,6 +45,7 @@ class CsvBookWriterPipeline:
         now = datetime.datetime.now()
         today = "{}/{}/{}".format(now.day, now.month, now.year)
         open("last_crawl_date.txt", "w").write(str(today))
+        open("running.state", 'w').write('0')
 
         print(f"Finished, {self.valid_items_count} books found")
 
