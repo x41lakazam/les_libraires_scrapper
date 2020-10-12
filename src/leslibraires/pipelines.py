@@ -8,6 +8,7 @@
 import csv
 from .items import BookItem
 from leslibraires.constants import *
+import datetime
 
 class BookPipeline:
 
@@ -40,6 +41,9 @@ class CsvBookWriterPipeline:
 
     def close_spider(self, spider):
         self.csv_file.close()
+        now = datetime.datetime.now()
+        today = "{}/{}/{}".format(now.day, now.month, now.year)
+        open("last_crawl_date.txt", "w").write(str(today))
 
         print(f"Finished, {self.valid_items_count} books found")
 

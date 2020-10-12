@@ -12,7 +12,8 @@ app = flask.Flask(__name__)
 
 @app.route('/')
 def index():
-    return "See results <a href='/results'>here</a>"
+    last_crawl = open("last_crawl_date.txt", 'r').read()
+    return f"See results of the {last_crawl} <a href='/results'>here</a>"
 
 @app.route('/results')
 def result():
