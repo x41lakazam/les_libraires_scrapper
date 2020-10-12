@@ -2,14 +2,33 @@
 Scrapper pour les rayons
 """
 import urllib
+from collections import defaultdict
 
 import scrapy
 from scrapy.loader import ItemLoader
-from scrapy.downloadermiddlewares import RetryMiddleware
 from leslibraires.items import BookItem
 from leslibraires.constants import *
 
+class Stats:
+
+    def __init__(self):
+        self.failed_on = defaultdict(int)
+
+    def describe(self):
+        print("="*50)
+        print("Statistics")
+        print("Failed on:")
+        for k, v in self.failed_on.items():
+            print(f'- {k}\t{v}')
+        print("="*50)
+
+
+stats = Stats()
+
 class BooksListSpider(scrapy.Spider):
+
+
+
     name = "books_list"
 
     start_urls = START_URLS
@@ -23,14 +42,17 @@ class BooksListSpider(scrapy.Spider):
         RETRY_TIMES = 10,
     )
 
-    SPIDER_MIDDLEWARES = {
-        "scrapy.downloadermiddlewares.retry.RetryMiddleware": 650
+    DOWNLOADER_MIDDLEWARES = {
+           'scrapy.downloadermiddlewares.retry.RetryMiddleware': 90,
     }
+
 
     if MAX_PAGES > 0:
         custom_settings['CLOSESPIDER_PAGECOUNT'] = MAX_PAGES
 
     def parse(self, response):
+
+
         # class ppanel-product
         books_list = response.xpath("//li[@itemtype='http://schema.org/Book']")
 
@@ -44,6 +66,7 @@ class BooksListSpider(scrapy.Spider):
             # Check if 'short' is one of the classes of the book disponibility
             available = book.xpath(".//span[contains(@class, 'delay')]/@class")[0].get()
             if not "short" in available.split(" "):
+                stats.failed_on['Pas de livraison']
                 continue
 
             details_uri = book.xpath(".//div[@class='image']/a/@href").get()
@@ -63,6 +86,8 @@ class BooksListSpider(scrapy.Spider):
 
         if next_page is not None:
             yield response.follow(next_page, self.parse)
+        else:
+            stats.describe()
 
     def parse_book_details(self, response):
 
@@ -72,7 +97,12 @@ class BooksListSpider(scrapy.Spider):
         main_infos = response.xpath("//div[@class='main-infos']")[0]
         image_url  =  response.xpath("//a[@data-target='#product-images']/div/img/@src").get()
 
-        description = response.xpath("//div[@id='infos-description']/text()").get().strip()
+        description = response.xpath("//div[@id='infos-description']/text()").get()
+        if not description:
+            stats.failed_on['Pas de description']
+            return
+
+
 
         author  = main_infos.xpath(".//h2/a/text()").get()
         title   = main_infos.xpath(".//h1/span/text()").get()
@@ -100,7 +130,7 @@ class BooksListSpider(scrapy.Spider):
         weight = weight.replace(u'\xa0', ' ') # TODO: Put in pipeline
 
         book_item['title']   = title
-        book_item['description'] = description
+        book_item['description'] = description.strip()
         book_item['image_url'] = image_url
         book_item['author']  = author
         book_item['book_format'] = book_format
@@ -118,6 +148,7 @@ class BooksListSpider(scrapy.Spider):
         offers_uri = response.xpath("//section[@id='product-offers']/div/a/@href").get()
         if not offers_uri:
             print(f"[x] Book {title}: no offers, passing")
+            stats.failed_on['Pas d\'offres']
             yield
         else:
             offers_url = urllib.parse.urljoin(response.url, offers_uri)
