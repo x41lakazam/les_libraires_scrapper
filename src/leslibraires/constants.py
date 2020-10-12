@@ -7,7 +7,7 @@ UNTRUSTED_LIBRARIES = [
 REQUIRED_FIELDS = [
     "title",
     "author",
-    "description",
+#    "description",
     "ean13"
 ]
 

@@ -14,10 +14,12 @@ class Stats:
     def __init__(self):
         self.failed_on = defaultdict(int)
         self.pages = 0
+        self.total_books = 0
+        self.books_scrapped = 0
 
     def describe(self):
         print("="*50)
-        print(f"Statistics on {self.pages} pages")
+        print(f"Statistics on {self.pages} pages ({self.books_scrapped}/{self.total_books} books)")
         print("Failed on:")
         for k, v in self.failed_on.items():
             print(f'- {k}\t{v}')
@@ -40,10 +42,14 @@ class BooksListSpider(scrapy.Spider):
         },
         RETRY_HTTP_CODES = [500, 502, 503, 504, 522, 524, 408, 429],
         RETRY_TIMES = 10,
+        CONCURENT_REQUESTS = 1,
+        DOWNLOAD_DELAY = 5,
     )
 
     DOWNLOADER_MIDDLEWARES = {
-           'scrapy.downloadermiddlewares.retry.RetryMiddleware': 90,
+        'scrapy.downloadermiddlewares.retry.RetryMiddleware': 90,
+        'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
+        'scrapy_user_agents.middlewares.RandomUserAgentMiddleware': 400,
     }
 
 
@@ -52,13 +58,13 @@ class BooksListSpider(scrapy.Spider):
 
     def parse(self, response):
 
-
         # class ppanel-product
         books_list = response.xpath("//li[@itemtype='http://schema.org/Book']")
 
         books_nb = len(books_list)
 
         for ix, book in enumerate(books_list):
+            stats.total_books += 1
 
             book_item = BookItem()
             book_item['_librairies'] = []
@@ -66,7 +72,7 @@ class BooksListSpider(scrapy.Spider):
             # Check if 'short' is one of the classes of the book disponibility
             available = book.xpath(".//span[contains(@class, 'delay')]/@class")[0].get()
             if not "short" in available.split(" "):
-                stats.failed_on['Pas de livraison'] += 1
+                stats.failed_on[available] += 1
                 continue
 
             details_uri = book.xpath(".//div[@class='image']/a/@href").get()
@@ -89,8 +95,12 @@ class BooksListSpider(scrapy.Spider):
         if next_page is not None:
             stats.pages += 1
             yield response.follow(next_page, self.parse)
+        else:
+            print("Stopped on page", stats.pages)
 
     def parse_book_details(self, response):
+
+        stats.books_scrapped += 1
 
         book_item = response.meta['book_item']
 
@@ -99,6 +109,7 @@ class BooksListSpider(scrapy.Spider):
         image_url  =  response.xpath("//a[@data-target='#product-images']/div/img/@src").get()
 
         description = response.xpath("//div[@id='infos-description']/text()").get()
+
         if not description:
             stats.failed_on['Pas de description'] += 1
             return
