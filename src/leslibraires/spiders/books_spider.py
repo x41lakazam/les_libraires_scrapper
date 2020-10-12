@@ -5,6 +5,7 @@ import urllib
 
 import scrapy
 from scrapy.loader import ItemLoader
+from scrapy.downloadermiddlewares import RetryMiddleware
 from leslibraires.items import BookItem
 from leslibraires.constants import *
 
@@ -18,8 +19,14 @@ class BooksListSpider(scrapy.Spider):
             'leslibraires.pipelines.BookPipeline': 300,
             'leslibraires.pipelines.CsvBookWriterPipeline': 400,
         },
-        RETRY_HTTP_CODES = [503],
+        RETRY_HTTP_CODES = [500, 502, 503, 504, 522, 524, 408, 429],
+        RETRY_TIMES = 10,
     )
+
+    SPIDER_MIDDLEWARES = {
+        "scrapy.downloadermiddlewares.retry.RetryMiddleware": 650
+    }
+
     if MAX_PAGES > 0:
         custom_settings['CLOSESPIDER_PAGECOUNT'] = MAX_PAGES
 
