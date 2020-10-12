@@ -66,7 +66,7 @@ class BooksListSpider(scrapy.Spider):
             # Check if 'short' is one of the classes of the book disponibility
             available = book.xpath(".//span[contains(@class, 'delay')]/@class")[0].get()
             if not "short" in available.split(" "):
-                stats.failed_on['Pas de livraison']
+                stats.failed_on['Pas de livraison'] += 1
                 continue
 
             details_uri = book.xpath(".//div[@class='image']/a/@href").get()
@@ -84,10 +84,10 @@ class BooksListSpider(scrapy.Spider):
 
         next_page = response.xpath("//ul[@class='pagination']/li[@class='active']/following-sibling::li/a/@href")[0].get()
 
+        stats.describe()
+
         if next_page is not None:
             yield response.follow(next_page, self.parse)
-        else:
-            stats.describe()
 
     def parse_book_details(self, response):
 
@@ -99,7 +99,7 @@ class BooksListSpider(scrapy.Spider):
 
         description = response.xpath("//div[@id='infos-description']/text()").get()
         if not description:
-            stats.failed_on['Pas de description']
+            stats.failed_on['Pas de description'] += 1
             return
 
 
@@ -148,7 +148,7 @@ class BooksListSpider(scrapy.Spider):
         offers_uri = response.xpath("//section[@id='product-offers']/div/a/@href").get()
         if not offers_uri:
             print(f"[x] Book {title}: no offers, passing")
-            stats.failed_on['Pas d\'offres']
+            stats.failed_on['Pas d\'offres'] += 1
             yield
         else:
             offers_url = urllib.parse.urljoin(response.url, offers_uri)

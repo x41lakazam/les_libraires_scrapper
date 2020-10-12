@@ -12,6 +12,7 @@ import subprocess
 app = flask.Flask(__name__)
 
 def crawler_running():
+
     return open("running.state", "r").read() == "1"
 
 @app.route('/')
@@ -20,12 +21,12 @@ def index():
 
     if crawler_running():
         return f"""
-            Run crawler <a href="/runspider">here</a>
+            Crawler is already running.
             See results of the {last_crawl} <a href='/results'>here</a>
         """
     else:
         return f"""
-            Crawler is already running.
+            Run crawler <a href="/runspider">here</a>
             See results of the {last_crawl} <a href='/results'>here</a>
         """
 
