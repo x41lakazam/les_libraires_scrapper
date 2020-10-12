@@ -13,21 +13,21 @@ class Stats:
 
     def __init__(self):
         self.failed_on = defaultdict(int)
+        self.pages = 0
 
     def describe(self):
         print("="*50)
-        print("Statistics")
+        print(f"Statistics on {self.pages} pages")
         print("Failed on:")
         for k, v in self.failed_on.items():
             print(f'- {k}\t{v}')
+
         print("="*50)
 
 
 stats = Stats()
 
 class BooksListSpider(scrapy.Spider):
-
-
 
     name = "books_list"
 
@@ -87,6 +87,7 @@ class BooksListSpider(scrapy.Spider):
         stats.describe()
 
         if next_page is not None:
+            stats.pages += 1
             yield response.follow(next_page, self.parse)
 
     def parse_book_details(self, response):

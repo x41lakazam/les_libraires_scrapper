@@ -21,13 +21,13 @@ def index():
 
     if crawler_running():
         return f"""
-            Crawler is already running.
+            Crawler is already running.<br>
             See results of the {last_crawl} <a href='/results'>here</a>
         """
     else:
         return f"""
-            Run crawler <a href="/runspider">here</a>
-            See results of the {last_crawl} <a href='/results'>here</a>
+            Run crawler <a href="/runspider">here</a><br>
+            See results of the {last_crawl} <a href='/results'>here</a> or download it <a href='/results-as-csv'>here</a><br>
         """
 
 @app.route('/runspider')
