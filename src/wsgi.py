@@ -34,7 +34,7 @@ def runspider():
     if crawler_running():
         return "Impossible action, crawler is already running"
 
-    subprocess.run(["scrapy", "runspider", "leslibraires/spiders/books_spider.py", "--output=scrapy.log", "--logfile=scrapy.error"])
+    subprocess.run(["scrapy", "runspider", "leslibraires/spiders/books_spider.py", "--logfile=scrapy.error"])
     return "Crawler running"
 
 @app.route('/results')
