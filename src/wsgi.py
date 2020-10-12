@@ -7,13 +7,22 @@
 # Copyright 2020. Eyal Shukrun. All rights reserved.
 #
 import flask
+import subprocess
 
 app = flask.Flask(__name__)
 
 @app.route('/')
 def index():
     last_crawl = open("last_crawl_date.txt", 'r').read()
-    return f"See results of the {last_crawl} <a href='/results'>here</a>"
+
+    return f"""
+Run crawler <a href="/runspider">here</a>
+See results of the {last_crawl} <a href='/results'>here</a>
+"""
+
+@app.route('/runspider')
+def runspider():
+    subprocess.run(["curl", "http://localhost:6800/schedule.json -d project=default -d spider=books_list"])
 
 @app.route('/results')
 def result():
