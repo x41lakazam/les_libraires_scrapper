@@ -22,7 +22,8 @@ See results of the {last_crawl} <a href='/results'>here</a>
 
 @app.route('/runspider')
 def runspider():
-    subprocess.run(["curl", "http://localhost:6800/schedule.json -d project=default -d spider=books_list"])
+    #subprocess.run(["curl", "http://localhost:6800/schedule.json -d project=default -d spider=books_list"])
+    subprocess.run(["scrapy", "runspider", "leslibraires/spiders/books_spider.py"])
     return "Crawler running"
 
 @app.route('/results')
